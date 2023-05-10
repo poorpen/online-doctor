@@ -5,7 +5,7 @@ T = TypeVar("T")
 
 
 @dataclass(frozen=True)
-class BaseVO(Generic[T]):
+class BaseValueObject(Generic[T]):
     value: T
 
     @classmethod
