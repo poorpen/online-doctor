@@ -12,6 +12,12 @@ class PositiveInteger(BaseValueObject[int]):
         if v < cls.min_value:
             raise ValueError('value less than minimum value')
 
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __gt__(self, other):
+        return self.value > other.value
+
 
 @dataclass(frozen=True)
 class IntegerInRange(BaseValueObject[int]):
