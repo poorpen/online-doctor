@@ -10,7 +10,7 @@ class BaseValueObject(Generic[T]):
 
     @classmethod
     def _validate(cls, v: T) -> None:
-        ...
+        pass
 
     @classmethod
     def _validate_type(cls, v: T) -> None:
