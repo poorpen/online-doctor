@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.domain.medcard.value_objects.anamnesis_vitae_point import AnswerID, CategoryID
+from src.domain.med_card.value_objects.anamnesis_vitae_point import AnswerID, CategoryID
 
 @dataclass(frozen=True)
 class AnswerAlreadySelected(Exception):

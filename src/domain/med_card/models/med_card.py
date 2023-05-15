@@ -1,16 +1,16 @@
 from uuid import UUID, uuid4
 from typing import List, Optional
 from datetime import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from src.domain.common.models.aggregate import AggregateRoot
 
-from src.domain.medcard.models.doctor_note import DoctorNote
-from src.domain.medcard.models.anamesis_vitae_point import AnamnesisVitaePoint
-from src.domain.medcard.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan
-from src.domain.medcard.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
-from src.domain.medcard.value_objects.anthropometry import Height, Weight
-from src.domain.medcard.exceptions.anamnesis_vitae_point import AnamnesisVitaePointNotExist
+from src.domain.med_card.models.doctor_note import DoctorNote
+from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint
+from src.domain.med_card.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan
+from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
+from src.domain.med_card.value_objects.anthropometry import Height, Weight
+from src.domain.med_card.exceptions.anamnesis_vitae_point import AnamnesisVitaePointNotExist
 
 
 @dataclass
@@ -20,7 +20,7 @@ class MedCard(AggregateRoot):
     height: Height
     weight: Weight
     date_of_birth: datetime
-    anamnesis_vitae: List[AnamnesisVitaePoint]
+    anamnesis_vitae: List[AnamnesisVitaePoint] = field(default_factory=list)
 
     def add_doctor_note(
             self,
@@ -38,11 +38,16 @@ class MedCard(AggregateRoot):
             treatment_plan=treatment_plan
         )
 
-    def add_answers__in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
+    def add_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
         anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)
         if not anamnesis_vitae_point:
             anamnesis_vitae_point = AnamnesisVitaePoint(medcard_uuid=self.uuid, category_id=category_id)
-        anamnesis_vitae_point.add_answer(answers_ids)
+            anamnesis_vitae_point.add_answer(answers_ids)
+            self.anamnesis_vitae.append(anamnesis_vitae_point)
+        else:
+            anamnesis_vitae_point.add_answer(answers_ids)
+            anamnesis_index = self.anamnesis_vitae.index(anamnesis_vitae_point)
+            self.anamnesis_vitae[anamnesis_index] = anamnesis_vitae_point
 
     def delete_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
         anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)

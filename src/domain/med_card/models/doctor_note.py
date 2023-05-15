@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from src.domain.common.models.entity import Entity
 
-from src.domain.medcard.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan
+from src.domain.med_card.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan
 
 
 @dataclass
