@@ -11,6 +11,5 @@ class TreatmentPlan(NonEmptyText):
     pass
 
 
-@dataclass(frozen=True)
 class Diagnosis(NonEmptyText):
     max_len: int = 100

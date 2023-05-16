@@ -9,3 +9,4 @@ class Height(IntegerInRange):
 class Weight(IntegerInRange):
     min_value: int = 30
     max_value: int = 220
+

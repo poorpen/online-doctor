@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from src.domain.common.value_objects.base import BaseValueObject
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class PositiveInteger(BaseValueObject[int]):
     min_value: int = 0
 
@@ -19,12 +19,13 @@ class PositiveInteger(BaseValueObject[int]):
         return self.value > other.value
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class IntegerInRange(BaseValueObject[int]):
-    min_value: int = 0.0
-    max_value: int = 10.0
+    min_value: int
+    max_value: int
 
     @classmethod
     def _validate(cls, v: int) -> None:
         if not cls.min_value <= v <= cls.max_value:
             raise ValueError('value uot of range')
+
