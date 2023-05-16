@@ -7,17 +7,19 @@ from src.domain.common.models.entity import Entity
 
 from src.domain.appointment_to_doctor.value_objects.appointment_to_doctor import Comment, DoctorUUID, PatientUUID
 from src.domain.appointment_to_doctor.enum.appointment_status import AppointmentStatus
-from src.domain.appointment_to_doctor.exceptions.appointment_to_doctor import InvalidDateTime, CantCancelAppointment
+from src.domain.appointment_to_doctor.exceptions.appointment_to_doctor import \
+    (InvalidDateTime, CantCancelAppointment, AlreadyDeleted)
 
 
 @dataclass
 class AppointmentToDoctor(Entity):
     uuid: UUID
-    doctor_uuid: DoctorUUID
+    doctor_uuid: Optional[DoctorUUID]
     date: datetime
     comment: Comment
     status: AppointmentStatus
     patient_uuid: Optional[PatientUUID] = None
+    deleted: bool = False
 
     @classmethod
     def create_appointment(
@@ -45,3 +47,19 @@ class AppointmentToDoctor(Entity):
             raise CantCancelAppointment()
         self.patient_uuid = None
         self.status = AppointmentStatus.IS_FREE
+
+    def delete(self) -> None:
+        self._validate_not_deleted()
+
+        if self.patient_uuid:
+            raise CantCancelAppointment
+        self.patient_uuid = None
+        self.doctor_uuid = None
+        self.deleted = True
+
+    def _validate_not_deleted(self) -> None:
+        if self.deleted:
+            raise AlreadyDeleted()
+
+
+

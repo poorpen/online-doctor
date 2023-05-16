@@ -2,19 +2,16 @@ from uuid import UUID
 from dataclasses import dataclass
 
 from src.domain.common.value_objects.base import BaseValueObject
-from src.domain.common.value_objects.string import OptionalText
+from src.domain.common.value_objects.string import Text
 
 
-@dataclass(frozen=True)
-class Comment(OptionalText):
+class Comment(Text):
     pass
 
 
-@dataclass(frozen=True)
 class DoctorUUID(BaseValueObject[UUID]):
     pass
 
 
-@dataclass(frozen=True)
 class PatientUUID(BaseValueObject[UUID]):
     pass
