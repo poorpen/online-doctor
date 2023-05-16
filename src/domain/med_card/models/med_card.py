@@ -21,6 +21,7 @@ class MedCard(AggregateRoot):
     weight: Weight
     date_of_birth: datetime
     anamnesis_vitae: List[AnamnesisVitaePoint] = field(default_factory=list)
+    doctor_notes: List[DoctorNote] = field(default_factory=list)
 
     def add_doctor_note(
             self,
@@ -28,15 +29,15 @@ class MedCard(AggregateRoot):
             anamnesis_morbi: AnamnesisMorbi,
             diagnosis: Diagnosis,
             treatment_plan: TreatmentPlan
-    ) -> DoctorNote:
-        return DoctorNote(
+    ) -> None:
+        self.doctor_notes.append(DoctorNote(
             uuid=uuid4(),
             medcard_uuid=self.uuid,
             doctor_uuid=doctor_uuid,
             anamnesis_morbi=anamnesis_morbi,
             diagnosis=diagnosis,
             treatment_plan=treatment_plan
-        )
+        ))
 
     def add_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
         anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)
