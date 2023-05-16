@@ -17,7 +17,7 @@ class AppointmentToDoctor(Entity):
     doctor_uuid: Optional[DoctorUUID]
     date: datetime
     comment: Comment
-    status: AppointmentStatus
+    status: Optional[AppointmentStatus]
     patient_uuid: Optional[PatientUUID] = None
     deleted: bool = False
 
@@ -28,7 +28,7 @@ class AppointmentToDoctor(Entity):
             doctor_uuid: DoctorUUID,
             comment: Comment,
     ) -> "AppointmentToDoctor":
-        if datetime_of_appointment < datetime.now():
+        if datetime_of_appointment < datetime.utcnow():
             raise InvalidDateTime()
         return AppointmentToDoctor(
             uuid=uuid4(),
@@ -43,7 +43,7 @@ class AppointmentToDoctor(Entity):
         self.status = AppointmentStatus.IS_BUSY
 
     def cancel_an_appointment(self) -> None:
-        if self.date - datetime.now() < timedelta(hours=24):
+        if self.date - datetime.utcnow() < timedelta(hours=24):
             raise CantCancelAppointment()
         self.patient_uuid = None
         self.status = AppointmentStatus.IS_FREE
@@ -56,6 +56,7 @@ class AppointmentToDoctor(Entity):
         self.patient_uuid = None
         self.doctor_uuid = None
         self.deleted = True
+        self.status = None
 
     def _validate_not_deleted(self) -> None:
         if self.deleted:
