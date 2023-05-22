@@ -1,4 +1,4 @@
-from src.domain.common.value_objects.identifiers import ID
+from src.common.domain.value_objects.identifiers import ID
 
 
 class CategoryID(ID):

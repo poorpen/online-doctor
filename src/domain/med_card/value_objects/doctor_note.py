@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-
-from src.domain.common.value_objects.string import NonEmptyText
+from src.common.domain.value_objects.identifiers import UUIDVO
+from src.common.domain.value_objects.string import NonEmptyText
 
 
 class AnamnesisMorbi(NonEmptyText):
@@ -13,3 +12,7 @@ class TreatmentPlan(NonEmptyText):
 
 class Diagnosis(NonEmptyText):
     max_len: int = 100
+
+
+class DoctorUUID(UUIDVO):
+    pass

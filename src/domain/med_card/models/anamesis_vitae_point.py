@@ -1,16 +1,16 @@
-from uuid import UUID
 from typing import List
 from dataclasses import dataclass, field
 
-from src.domain.common.models.entity import Entity
+from src.common.domain.models.entity import Entity
 
+from src.domain.med_card.value_objects.common import MedCardUUID
 from src.domain.med_card.exceptions.anamnesis_vitae_point import AnswerAlreadySelected, AnswerNotSelected
 from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
 
 
 @dataclass
 class AnamnesisVitaePoint(Entity):
-    medcard_uuid: UUID
+    medcard_uuid: MedCardUUID
     category_id: CategoryID
     answers_ids: List[AnswerID] = field(default_factory=list)
 
@@ -29,3 +29,7 @@ class AnamnesisVitaePoint(Entity):
         if unselected_answers:
             raise AnswerNotSelected(unselected_answers.pop())
         self.answers_ids = sorted(list(set_answer_ids - set_delete_answer_ids))
+
+    @property
+    def anamnesis_category_id(self) -> CategoryID:
+        return self.category_id

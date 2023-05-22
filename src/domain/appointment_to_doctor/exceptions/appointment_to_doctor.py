@@ -1,14 +1,20 @@
-class InvalidDateTime(Exception):
-    pass
+from uuid import UUID
+from datetime import datetime
+
+from src.common.domain.exceptions.domain import DomainException
 
 
-class CantCancelAppointment(Exception):
-    pass
+class CantCancelAppointment(DomainException):
+    value: UUID
 
 
-class CantDelete(Exception):
-    pass
+class AppointmentFinished(DomainException):
+    value: UUID
 
 
-class AlreadyDeleted(Exception):
-    pass
+class AppointmentCanceled(DomainException):
+    value: UUID
+
+
+class CantMakeAppointment(DomainException):
+    value: datetime

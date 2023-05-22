@@ -1,17 +1,15 @@
-from dataclasses import dataclass
+from src.common.domain.exceptions.domain import DomainException
 
 from src.domain.med_card.value_objects.anamnesis_vitae_point import AnswerID, CategoryID
 
-@dataclass(frozen=True)
-class AnswerAlreadySelected(Exception):
-    answer_id: AnswerID
+
+class AnswerAlreadySelected(DomainException):
+    value: AnswerID
 
 
-@dataclass(frozen=True)
-class AnswerNotSelected(Exception):
-    answer_id: AnswerID
+class AnswerNotSelected(DomainException):
+    value: AnswerID
 
 
-@dataclass(frozen=True)
-class AnamnesisVitaePointNotExist(Exception):
-    category_id: CategoryID
+class AnamnesisVitaePointNotExist(DomainException):
+    value: CategoryID

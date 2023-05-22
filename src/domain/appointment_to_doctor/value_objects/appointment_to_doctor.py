@@ -1,17 +1,27 @@
-from uuid import UUID
-from dataclasses import dataclass
+from datetime import datetime, timedelta
 
-from src.domain.common.value_objects.base import BaseValueObject
-from src.domain.common.value_objects.string import Text
+from src.common.domain.value_objects.base import BaseValueObject
+from src.common.domain.value_objects.identifiers import UUIDVO
+from src.common.domain.value_objects.string import Text
 
 
-class Comment(Text):
+class DoctorUUID(UUIDVO):
     pass
 
 
-class DoctorUUID(BaseValueObject[UUID]):
+class PatientUUID(UUIDVO):
     pass
 
 
-class PatientUUID(BaseValueObject[UUID]):
-    pass
+class AppointmentDatetime(BaseValueObject[datetime]):
+
+    @classmethod
+    def _validate(cls, v: datetime) -> None:
+        if v < datetime.utcnow() - timedelta(minutes=1):
+            raise ValueError('appointment date invalid')
+
+    def __sub__(self, other):
+        res = self.value - self._value_getter(other)
+        if not isinstance(res, timedelta):
+            res = self.__class__(res)
+        return res
