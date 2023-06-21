@@ -6,7 +6,7 @@ from src.common.domain.value_objects.identifiers import UUIDVO
 
 from src.domain.consultation.enum.consultation_status import ConsultationStatus
 from src.domain.consultation.models.consultation import Consultation
-from src.domain.consultation.value_objects.consultation import StartConsultationDateTime, DoctorUUID, PatientUUID
+from src.domain.consultation.value_objects.consultation import ConsultationDateTime, DoctorUUID, PatientUUID
 from src.domain.consultation.exceptions.consultation import ConsultationFinished
 
 
@@ -16,7 +16,7 @@ def consultation():
         uuid=UUIDVO(uuid4()),
         patient_uuid=PatientUUID(uuid4()),
         doctor_uuid=DoctorUUID(uuid4()),
-        start_datetime=StartConsultationDateTime(datetime.utcnow()),
+        consultation_datetime=ConsultationDateTime(datetime.utcnow()),
         status=ConsultationStatus.IN_PROCESS
     )
 
@@ -27,7 +27,7 @@ def test_create_consultation_when_datetime_invalid_past():
             uuid=UUIDVO(uuid4()),
             patient_uuid=PatientUUID(uuid4()),
             doctor_uuid=DoctorUUID(uuid4()),
-            start_datetime=StartConsultationDateTime(datetime.utcnow()) - timedelta(minutes=5),
+            consultation_datetime=ConsultationDateTime(datetime.utcnow()) - timedelta(minutes=5),
             status=ConsultationStatus.IN_PROCESS
         )
 
@@ -38,7 +38,7 @@ def test_create_consultation_when_datetime_invalid_future():
             uuid=UUIDVO(uuid4()),
             patient_uuid=PatientUUID(uuid4()),
             doctor_uuid=DoctorUUID(uuid4()),
-            start_datetime=StartConsultationDateTime(datetime.utcnow()) + timedelta(minutes=6),
+            consultation_datetime=ConsultationDateTime(datetime.utcnow()) + timedelta(minutes=6),
             status=ConsultationStatus.IN_PROCESS
         )
 
