@@ -1,4 +1,4 @@
-from src.common.domain.specifications.specification import Specification
+from src.common.domain.specifications.base import Specification
 from src.common.domain.models.access import Access
 from src.common.domain.enum.access_level import LevelName
 
