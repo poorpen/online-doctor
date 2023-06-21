@@ -12,9 +12,16 @@ class PatientUUID(UUIDVO):
     pass
 
 
-class StartConsultationDateTime(BaseValueObject[datetime]):
+class ConsultationDateTime(BaseValueObject[datetime]):
 
     @classmethod
     def _validate(cls, v: datetime) -> None:
-        if v < datetime.utcnow() - timedelta(minutes=5) or v > datetime.utcnow() + timedelta(minutes=5):
-            raise ValueError("consultation date invalid")
+        if v < datetime.utcnow() - timedelta(minutes=1):
+            raise ValueError('appointment date invalid')
+
+    def __sub__(self, other):
+        res = self.value - self._value_getter(other)
+        if not isinstance(res, timedelta):
+            res = self.__class__(res)
+        return res
+
