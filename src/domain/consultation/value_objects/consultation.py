@@ -14,10 +14,6 @@ class PatientUUID(UUIDVO):
 
 class ConsultationDateTime(BaseValueObject[datetime]):
 
-    @classmethod
-    def _validate(cls, v: datetime) -> None:
-        if v < datetime.utcnow() - timedelta(minutes=1):
-            raise ValueError('appointment date invalid')
 
     def __sub__(self, other):
         res = self.value - self._value_getter(other)

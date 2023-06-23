@@ -7,7 +7,7 @@ from src.common.domain.value_objects.identifiers import UUIDVO
 from src.domain.consultation.value_objects.consultation import PatientUUID, DoctorUUID, ConsultationDateTime
 from src.domain.consultation.enum.consultation_status import ConsultationStatus
 from src.domain.consultation.exceptions.consultation import ConsultationFinished, CantCancelConsultation, \
-    ConsultationCanceled, CantStartConsultation, CantMakeAnAppointment
+    ConsultationCanceled, CantStartConsultation, CantMakeAnAppointment, ConsultationScheduled, ConsultationInProcess
 
 
 @dataclass
@@ -19,12 +19,12 @@ class Consultation(AggregateRoot):
     status: ConsultationStatus
 
     @classmethod
-    def appointment_to_consultation(cls,
-                                    uuid: UUIDVO,
-                                    patient_uuid: PatientUUID,
-                                    doctor_uuid: DoctorUUID,
-                                    consultation_datetime: ConsultationDateTime
-                                    ) -> "Consultation":
+    def scheduled_a_consultation(cls,
+                                 uuid: UUIDVO,
+                                 patient_uuid: PatientUUID,
+                                 doctor_uuid: DoctorUUID,
+                                 consultation_datetime: ConsultationDateTime
+                                 ) -> "Consultation":
         if consultation_datetime < datetime.utcnow() - timedelta(minutes=1):
             raise CantMakeAnAppointment(consultation_datetime)
         return cls(
@@ -36,24 +36,30 @@ class Consultation(AggregateRoot):
         )
 
     def cancel_consultation(self) -> None:
-        if self.consultation_datetime - datetime.utcnow() < timedelta(hours=24):
+        self._check_consultation_status()
+        if self.status == ConsultationStatus.IN_PROCESS:
+            raise ConsultationInProcess(self.uuid)
+        elif self.consultation_datetime - datetime.utcnow() < timedelta(hours=24):
             raise CantCancelConsultation(self.consultation_datetime)
-        elif self.status == ConsultationStatus.FINISHED:
-            raise ConsultationFinished(self.uuid)
-        elif self.status == ConsultationStatus.CANCELED:
-            raise ConsultationCanceled(self.uuid)
         self.status = ConsultationStatus.CANCELED
 
     def start_consultation(self) -> None:
+        self._check_consultation_status()
         if self.consultation_datetime < datetime.utcnow() - timedelta(
-                minutes=5) or self.consultation_datetime > datetime.utcnow() + timedelta(
-                minutes=5):
+                minutes=5) or self.consultation_datetime > datetime.utcnow() + timedelta(minutes=5):
             raise CantStartConsultation(self.consultation_datetime)
+        elif self.status == ConsultationStatus.IN_PROCESS:
+            raise ConsultationInProcess(self.uuid)
         self.status = ConsultationStatus.IN_PROCESS
 
     def finish_consultation(self) -> None:
+        self._check_consultation_status()
+        if self.status == ConsultationStatus.SCHEDULED:
+            raise ConsultationScheduled(self.uuid)
+        self.status = ConsultationStatus.FINISHED
+
+    def _check_consultation_status(self) -> None:
         if self.status == ConsultationStatus.FINISHED:
             raise ConsultationFinished(self.uuid)
         elif self.status == ConsultationStatus.CANCELED:
             raise ConsultationCanceled(self.uuid)
-        self.status = ConsultationStatus.FINISHED

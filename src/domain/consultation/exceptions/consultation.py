@@ -21,6 +21,14 @@ class ConsultationCanceled(DomainException):
     value: UUID
 
 
+class ConsultationInProcess(DomainException):
+    value: UUID
+
+
+class ConsultationScheduled(DomainException):
+    value: UUID
+
+
 class CantStartConsultation(DomainException):
     value: datetime
 
