@@ -36,7 +36,7 @@ class Consultation(AggregateRoot):
         )
 
     def cancel_consultation(self) -> None:
-        self._check_consultation_status()
+        self._check_consultation_finish_or_canceled()
         if self.status == ConsultationStatus.IN_PROCESS:
             raise ConsultationInProcess(self.uuid)
         elif self.consultation_datetime - datetime.utcnow() < timedelta(hours=24):
@@ -44,7 +44,7 @@ class Consultation(AggregateRoot):
         self.status = ConsultationStatus.CANCELED
 
     def start_consultation(self) -> None:
-        self._check_consultation_status()
+        self._check_consultation_finish_or_canceled()
         if self.consultation_datetime < datetime.utcnow() - timedelta(
                 minutes=5) or self.consultation_datetime > datetime.utcnow() + timedelta(minutes=5):
             raise CantStartConsultation(self.consultation_datetime)
@@ -53,12 +53,12 @@ class Consultation(AggregateRoot):
         self.status = ConsultationStatus.IN_PROCESS
 
     def finish_consultation(self) -> None:
-        self._check_consultation_status()
+        self._check_consultation_finish_or_canceled()
         if self.status == ConsultationStatus.SCHEDULED:
             raise ConsultationScheduled(self.uuid)
         self.status = ConsultationStatus.FINISHED
 
-    def _check_consultation_status(self) -> None:
+    def _check_consultation_finish_or_canceled(self) -> None:
         if self.status == ConsultationStatus.FINISHED:
             raise ConsultationFinished(self.uuid)
         elif self.status == ConsultationStatus.CANCELED:
