@@ -11,7 +11,6 @@ from src.domain.med_card.value_objects.common import MedCardUUID
 from src.domain.med_card.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan, DoctorUUID
 from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
 from src.domain.med_card.value_objects.med_card import Height, Weight, PatientUUID, DateTimeOfBirth
-from src.domain.med_card.exceptions.anamnesis_vitae_point import AnamnesisVitaePointNotExist
 
 
 @dataclass
@@ -42,21 +41,13 @@ class MedCard(AggregateRoot):
             )
         )
 
-    def add_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
+    def update_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
         anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)
         if not anamnesis_vitae_point:
             anamnesis_vitae_point = AnamnesisVitaePoint(medcard_uuid=MedCardUUID(self.uuid.get_value()),
                                                         category_id=category_id)
-            anamnesis_vitae_point.add_answer(answers_ids)
             self.anamnesis_vitae.append(anamnesis_vitae_point)
-        else:
-            anamnesis_vitae_point.add_answer(answers_ids)
-
-    def delete_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
-        anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)
-        if not anamnesis_vitae_point:
-            raise AnamnesisVitaePointNotExist(category_id)
-        anamnesis_vitae_point.delete_answer(answers_ids)
+        anamnesis_vitae_point.update_answers(answers_ids)
 
     def edit_anthropometry_data(self, weight: Optional[Weight] = None, height: Optional[Height] = None) -> None:
         if weight:
