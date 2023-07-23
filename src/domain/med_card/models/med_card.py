@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import uuid4, UUID
 from typing import List, Optional
 from dataclasses import dataclass, field
 
@@ -10,18 +10,28 @@ from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint
 from src.domain.med_card.value_objects.common import MedCardUUID
 from src.domain.med_card.value_objects.doctor_note import AnamnesisMorbi, Diagnosis, TreatmentPlan, DoctorUUID
 from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
-from src.domain.med_card.value_objects.med_card import Height, Weight, PatientUUID, DateTimeOfBirth
+from src.domain.med_card.value_objects.med_card import Height, Weight, PatientUUID, DateTimeOfBirth, FirstName, \
+    LastName, MiddleName
+from src.domain.med_card.enum.gender import Gender
 
 
 @dataclass
 class MedCard(AggregateRoot):
     uuid: UUIDVO
     patient_uuid: PatientUUID
-    height: Height
-    weight: Weight
-    date_of_birth: DateTimeOfBirth
+    first_name: FirstName
+    last_name: LastName
+    middle_name: MiddleName
+    datetime_of_birth: DateTimeOfBirth
+    gender: Gender
+    height: Height = field(default=Height(0))
+    weight: Weight = field(default=Weight(0))
     anamnesis_vitae: List[AnamnesisVitaePoint] = field(default_factory=list)
     doctor_notes: List[DoctorNote] = field(default_factory=list)
+
+    @property
+    def get_patient_uuid(self) -> UUID:
+        return self.patient_uuid.get_value()
 
     def add_doctor_note(
             self,

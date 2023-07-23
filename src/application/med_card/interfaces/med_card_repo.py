@@ -10,8 +10,8 @@ class MedCardRepo(Protocol):
     def get_med_card_by_uuid(self, med_card: UUIDVO) -> MedCard:
         raise NotImplemented
 
-    def get_med_card_by_patient_uuid(self, med_card: UUIDVO) -> MedCard:
+    def update_med_card(self, med_card: MedCard) -> None:
         raise NotImplemented
 
-    def update_med_card(self, med_card: MedCard) -> None:
+    def add_med_card(self, med_card: MedCard) -> None:
         raise NotImplemented

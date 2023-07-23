@@ -1,4 +1,6 @@
-from src.common.domain.specifications.base import Specification
+from uuid import UUID
+
+from src.common.domain.utils.base_specification import Specification
 from src.common.domain.models.access import Access
 from src.common.domain.enum.access_level import LevelName
 
@@ -17,7 +19,7 @@ class IsPatient(Specification):
 
 class UserUUIDMatches(Specification):
 
-    def __init__(self, other_uuid):
+    def __init__(self, other_uuid: UUID):
         self.other_uuid = other_uuid
 
     def is_satisfied_by(self, candidates: Access) -> bool:

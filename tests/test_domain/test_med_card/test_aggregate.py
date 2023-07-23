@@ -8,16 +8,20 @@ from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint
 from src.domain.med_card.models.med_card import MedCard
 from src.domain.med_card.value_objects.common import MedCardUUID
 from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID
-from src.domain.med_card.value_objects.med_card import Height, Weight, PatientUUID, DateTimeOfBirth
-
+from src.domain.med_card.value_objects.med_card import FirstName, LastName,Height, Weight,MiddleName, PatientUUID, DateTimeOfBirth
+from src.domain.med_card.enum.gender import Gender
 
 @pytest.fixture()
 def med_card():
     return MedCard(uuid=UUIDVO(uuid.uuid4()),
+                   first_name=FirstName('walter'),
+                   last_name=LastName('hartwel'),
+                   middle_name=MiddleName('white'),
                    patient_uuid=PatientUUID(uuid.uuid4()),
                    height=Height(173),
                    weight=Weight(175),
-                   date_of_birth=DateTimeOfBirth(datetime(year=1889, month=4, day=20)))
+                   datetime_of_birth=DateTimeOfBirth(datetime(year=1889, month=4, day=20)),
+                   gender=Gender('MALE'))
 
 
 def test_add_answer(med_card):

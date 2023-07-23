@@ -55,5 +55,3 @@ class Or(MultiSpecification):
                 for specification in self.specifications
             ]
         )
-
-

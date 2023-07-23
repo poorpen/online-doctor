@@ -15,12 +15,6 @@ class BaseValueObject(Generic[T]):
     def _validate(cls, v: T) -> None:
         pass
 
-    @classmethod
-    def _validate_type(cls, v: T) -> None:
-        current_type = cls.__orig_bases__[0].__args__[0]
-        if not isinstance(v, current_type):
-            raise TypeError(f'value must match the type {current_type}')
-
     @staticmethod
     def _value_getter(other) -> Any:
         if isinstance(other, BaseValueObject):
@@ -28,7 +22,6 @@ class BaseValueObject(Generic[T]):
         return other
 
     def __new__(cls, v: T) -> 'BaseValueObject':
-        cls._validate_type(v)
         cls._validate(v)
         return super().__new__(cls)
 
@@ -57,5 +50,3 @@ class BaseValueObject(Generic[T]):
 
     def __ge__(self, other):
         return self.value >= self._value_getter(other)
-
-
