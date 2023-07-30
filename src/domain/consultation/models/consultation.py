@@ -5,9 +5,10 @@ from src.common.domain.models.aggregate import AggregateRoot
 from src.common.domain.value_objects.identifiers import UUIDVO
 
 from src.domain.consultation.value_objects.consultation import PatientUUID, DoctorUUID, ConsultationDateTime
+from src.domain.consultation.models.consultation_events import ConsultationScheduled
 from src.domain.consultation.enum.consultation_status import ConsultationStatus
 from src.domain.consultation.exceptions.consultation import ConsultationFinished, CantCancelConsultation, \
-    ConsultationCanceled, CantStartConsultation, CantMakeAnAppointment, ConsultationScheduled, ConsultationInProcess
+    ConsultationCanceled, CantStartConsultation, CantMakeAnAppointment, ConsultationNotStarted, ConsultationInProcess
 
 
 @dataclass
@@ -27,15 +28,21 @@ class Consultation(AggregateRoot):
                                  ) -> "Consultation":
         if consultation_datetime < datetime.utcnow() - timedelta(minutes=1):
             raise CantMakeAnAppointment(consultation_datetime)
-        return cls(
+        consultation = cls(
             uuid=uuid,
             patient_uuid=patient_uuid,
             doctor_uuid=doctor_uuid,
             consultation_datetime=consultation_datetime,
             status=ConsultationStatus.SCHEDULED
         )
+        consultation.record_event(
+            ConsultationScheduled(
+                consultation_datetime.get_value()
+            )
+        )
+        return consultation
 
-    def cancel_consultation(self) -> None:
+    def cancel_scheduled_consultation(self) -> None:
         self._check_consultation_finish_or_canceled()
         if self.status == ConsultationStatus.IN_PROCESS:
             raise ConsultationInProcess(self.uuid)
@@ -55,7 +62,7 @@ class Consultation(AggregateRoot):
     def finish_consultation(self) -> None:
         self._check_consultation_finish_or_canceled()
         if self.status == ConsultationStatus.SCHEDULED:
-            raise ConsultationScheduled(self.uuid)
+            raise ConsultationNotStarted(self.uuid)
         self.status = ConsultationStatus.FINISHED
 
     def _check_consultation_finish_or_canceled(self) -> None:

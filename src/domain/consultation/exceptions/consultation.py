@@ -25,7 +25,7 @@ class ConsultationInProcess(DomainException):
     value: UUID
 
 
-class ConsultationScheduled(DomainException):
+class ConsultationNotStarted(DomainException):
     value: UUID
 
 

@@ -2,14 +2,14 @@ from src.common.application.queries.base import QueryHandler
 
 from src.application.med_card.models.query import GetAnswersForCategory
 from src.application.med_card.models.dto import AnswersForCategory
-from src.application.med_card.interfaces.med_card_db_gateway import MedCardDBGateway
+from src.application.med_card.interfaces.med_card_db_gateway import IMedCardDBGateway
 
 
 class GetAnswersForCategoryQuery(QueryHandler):
 
     def __init__(
             self,
-            db_gateway: MedCardDBGateway,
+            db_gateway: IMedCardDBGateway,
     ):
         self._db_gateway = db_gateway
 

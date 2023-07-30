@@ -1,6 +1,6 @@
 from typing import List
 
-from src.common.domain.models.event import Event
+from src.common.domain.models.events import DomainEvent
 from src.common.domain.value_objects.identifiers import UUIDVO
 
 from src.domain.consultation.models.consultation_events import ConsultationActive
@@ -13,18 +13,18 @@ class ConsultationService:
 
     def __init__(self, db_gateway: IDBGateway):
         self._db_gateway = db_gateway
-        self._events: List[Event] = []
+        self._events: List[DomainEvent] = []
 
-    def _record_event(self, event: Event) -> None:
+    def _record_event(self, event: DomainEvent) -> None:
         self._events.append(event)
 
     def _clear_event(self) -> None:
         self._events.clear()
 
-    def _get_events(self) -> List[Event]:
+    def _get_events(self) -> List[DomainEvent]:
         return self._events.copy()
 
-    def pull_event(self) -> List[Event]:
+    def pull_event(self) -> List[DomainEvent]:
         events = self._get_events()
         self._clear_event()
         return events

@@ -2,21 +2,23 @@ from src.common.domain.value_objects.identifiers import UUIDVO
 from src.common.domain.services.access_policy import IsDoctor
 
 from src.common.application.commands.base import CommandHandler
-from src.common.application.interfaces.identity_provider import IdentityProvider
+from src.common.application.interfaces.identity_provider import IIdentityProvider
+from src.common.application.interfaces.mediator import IMediator
 from src.common.application.exceptions.access import AccessDenied
 
 from src.domain.med_card.value_objects.doctor_note import TreatmentPlan, Diagnosis, DoctorUUID, AnamnesisMorbi
 
 from src.application.med_card.models.command import AddDoctorNote
-from src.application.med_card.interfaces.med_card_db_gateway import MedCardDBGateway
+from src.application.med_card.interfaces.med_card_db_gateway import IMedCardDBGateway
 from src.application.med_card.exceptions.med_card import MedCardNotFound, DoctorNotFound
 
 
 class AddDoctorNoteCommand(CommandHandler):
 
-    def __init__(self, db_gateway: MedCardDBGateway, identity_provider: IdentityProvider):
+    def __init__(self, db_gateway: IMedCardDBGateway, identity_provider: IIdentityProvider, mediator: IMediator):
         self._db_gateway = db_gateway
         self._identity_provider = identity_provider
+        self._mediator = mediator
 
     def __call__(self, command_data: AddDoctorNote) -> None:
         access_policy = self._identity_provider.get_access_policy()
@@ -37,6 +39,10 @@ class AddDoctorNoteCommand(CommandHandler):
             anamnesis_morbi=anamnesis_morbi,
             diagnosis=diagnosis,
             treatment_plan=treatment_plan
+        )
+
+        self._mediator.publish(
+            med_card_aggregate.pull_events()
         )
 
         try:

@@ -2,7 +2,7 @@ from abc import ABC
 from typing import List
 from dataclasses import dataclass, field
 
-from src.common.domain.models.event import Event
+from src.common.domain.models.events import Event
 
 
 @dataclass
@@ -15,7 +15,7 @@ class AggregateRoot(ABC):
     def _clear_events(self) -> None:
         self._events.clear()
 
-    def record_event(self, event: Event) -> Event:
+    def record_event(self, event: Event) -> None:
         self._events.append(event)
 
     def pull_events(self) -> List[Event]:

@@ -7,3 +7,9 @@ class Event(ABC):
     pass
 
 
+class DomainEvent(Event):
+    pass
+
+
+class LoggingEvent(Event):
+    pass

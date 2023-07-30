@@ -1,9 +1,9 @@
-from src.common.application.interfaces.db_gateway import DBGateway
+from src.common.application.interfaces.db_gateway import IDBGateway
 
-from src.application.med_card.interfaces.med_card_reader import MedCardReader
-from src.application.med_card.interfaces.med_card_repo import MedCardRepo
+from src.application.med_card.interfaces.med_card_reader import IMedCardReader
+from src.application.med_card.interfaces.med_card_repo import IMedCardRepo
 
 
-class MedCardDBGateway(DBGateway):
-    med_card_reader: MedCardReader
-    med_card_repo: MedCardRepo
+class IMedCardDBGateway(IDBGateway):
+    med_card_reader: IMedCardReader
+    med_card_repo: IMedCardRepo

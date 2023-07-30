@@ -1,19 +1,19 @@
 from src.common.domain.services.access_policy import IsDoctor
 from src.common.application.queries.base import QueryHandler
-from src.common.application.interfaces.identity_provider import IdentityProvider
+from src.common.application.interfaces.identity_provider import IIdentityProvider
 from src.common.application.exceptions.access import AccessDenied
 
 from src.application.med_card.models.query import GetPersonalMedCardInfo
 from src.application.med_card.models.dto import PersonalInfoMedCardDTO
-from src.application.med_card.interfaces.med_card_db_gateway import MedCardDBGateway
+from src.application.med_card.interfaces.med_card_db_gateway import IMedCardDBGateway
 
 
 class GetPersonalInfoFromMedCardQuery(QueryHandler):
 
     def __init__(
             self,
-            db_gateway: MedCardDBGateway,
-            identity_provider: IdentityProvider
+            db_gateway: IMedCardDBGateway,
+            identity_provider: IIdentityProvider
     ):
         self._db_gateway = db_gateway
         self._identity_provider = identity_provider

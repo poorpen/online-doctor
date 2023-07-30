@@ -5,7 +5,7 @@ from uuid import UUID
 from src.application.med_card.models.dto import MedCardDTO, AnswersForCategory, PersonalInfoMedCardDTO, DoctorNotes
 
 
-class MedCardReader(Protocol):
+class IMedCardReader(Protocol):
 
     def search_med_card(self,
                         fist_name: Optional[str] = None,

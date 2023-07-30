@@ -1,7 +1,7 @@
 from abc import ABC
 
 
-class DBGateway(ABC):
+class IDBGateway(ABC):
 
     def commit(self) -> None:
         raise NotImplemented
