@@ -5,19 +5,23 @@ from src.common.domain.models.access import Access
 from src.common.domain.enum.access_level import LevelName
 
 
-class IsDoctor(Specification):
+class AccessSpecification(Specification[Access]):
+    pass
+
+
+class IsDoctor(AccessSpecification):
 
     def is_satisfied_by(self, candidate: Access) -> bool:
         return candidate.access_name == LevelName.DOCTOR
 
 
-class IsPatient(Specification):
+class IsPatient(AccessSpecification):
 
     def is_satisfied_by(self, candidate: Access) -> bool:
         return candidate.access_name == LevelName.PATIENT
 
 
-class UserUUIDMatches(Specification):
+class UserUUIDMatches(AccessSpecification):
 
     def __init__(self, other_uuid: UUID):
         self.other_uuid = other_uuid

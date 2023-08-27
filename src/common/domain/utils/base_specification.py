@@ -1,9 +1,9 @@
-from typing import Any, TypeVar
+from typing import Any, TypeVar, Generic
 
 T = TypeVar("T")
 
 
-class Specification:
+class Specification(Generic[T]):
 
     def is_satisfied_by(self, candidates: T) -> bool:
         raise NotImplemented
