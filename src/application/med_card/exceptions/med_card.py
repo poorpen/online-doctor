@@ -25,3 +25,11 @@ class CategoryIDNotFound(ApplicationException):
 
 class AnswerIDNotFound(ApplicationException):
     value: int
+
+
+class AnswersForCurrentCategoryNotFound(ApplicationException):
+    value: int
+
+
+class DoctorNotesNotFound(ApplicationException):
+    value: int

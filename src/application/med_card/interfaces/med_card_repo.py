@@ -7,7 +7,7 @@ from src.domain.med_card.models.med_card import MedCard
 
 class IMedCardRepo(Protocol):
 
-    def get_med_card_by_uuid(self, med_card: UUIDVO) -> MedCard:
+    def get_med_card_by_uuid(self, med_card_uuid: UUIDVO) -> MedCard:
         raise NotImplemented
 
     def update_med_card(self, med_card: MedCard) -> None:

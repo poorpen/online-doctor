@@ -7,13 +7,13 @@ from src.common.application.models.dto import DTO
 
 
 @dataclass(frozen=True)
-class Answer(DTO):
+class AnswerDTO(DTO):
     answer_name: str
     answer_id: int
 
 
 @dataclass(frozen=True)
-class AnamnesisVitaePoint(DTO):
+class AnamnesisVitaePointDTO(DTO):
     category_id: int
     category_name: str
     answers_names: List[str]
@@ -21,13 +21,14 @@ class AnamnesisVitaePoint(DTO):
 
 @dataclass(frozen=True)
 class AnswersForCategory(DTO):
+    category_id: int
     category_name: str
-    answers: List[Answer]
+    answers: List[AnswerDTO]
 
 
 @dataclass(frozen=True)
-class PersonalInfoMedCardDTO(DTO):
-    med_card_uuid: UUID
+class MedCardPreviewDTO(DTO):
+    uuid: UUID
     patient_uuid: UUID
     first_name: str
     last_name: str
@@ -37,21 +38,23 @@ class PersonalInfoMedCardDTO(DTO):
 
 
 @dataclass(frozen=True)
-class MedCardDTO(PersonalInfoMedCardDTO):
+class MedCardDTO(MedCardPreviewDTO):
     height: int
     weight: int
-    anamnesis_vitae: List[AnamnesisVitaePoint]
+    anamnesis_vitae: List[AnamnesisVitaePointDTO]
 
 
 @dataclass(frozen=True)
 class DoctorNoteDTO(DTO):
+    note_uuid: UUID
     anamnesis_morbi: str
     diagnosis: str
     treatment_plan: str
 
 
 @dataclass(frozen=True)
-class DoctorNotes(DTO):
+class DoctorNotesDTO(DTO):
+    doctor_uuid: UUID
     doctor_first_name: str
     doctor_last_name: str
     doctor_middle_name: str

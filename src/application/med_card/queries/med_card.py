@@ -19,12 +19,16 @@ class GetMedCardQuery(QueryHandler):
         self._identity_provider = identity_provider
 
     def __call__(self, query_data: GetMedCard) -> MedCardDTO:
-        can_get_med_card = IsDoctor() | (IsPatient() & UserUUIDMatches(query_data.patient_uuid))
+        med_card = self._db_gateway.med_card_reader.get_med_card_by_med_card_or_patient_uuid(
+            patient_uuid=query_data.patient_uuid,
+            med_card_uuid=query_data.med_card_uuid
+        )
 
         access_policy = self._identity_provider.get_access_policy()
+
+        can_get_med_card = IsDoctor() | (IsPatient() & UserUUIDMatches(med_card.patient_uuid))
+
         if not can_get_med_card.is_satisfied_by(access_policy):
             raise AccessDenied(access_policy.user_uuid)
-
-        med_card = self._db_gateway.med_card_reader.get_med_card_by_patient_uuid(patient_uuid=query_data.patient_uuid)
 
         return med_card

@@ -22,7 +22,7 @@ class CreateMedCardCommand(CommandHandler):
         self._identity_provider = identity_provider
         self._mediator = mediator
 
-    def __call__(self, command_data: CreateMedCard) -> UUID:
+    def __call__(self, command_data: CreateMedCard) -> None:
         access_policy = self._identity_provider.get_access_policy()
         can_create_med_card = IsPatient()
         if not can_create_med_card.is_satisfied_by(access_policy):
@@ -37,7 +37,7 @@ class CreateMedCardCommand(CommandHandler):
         gender = Gender(command_data.gender)
 
         med_card = MedCard.create_med_card(
-            uuid=UUIDVO(uuid4()),
+            uuid=med_card_uuid,
             patient_uuid=patient_uuid,
             first_name=first_name,
             last_name=last_name,
@@ -55,5 +55,3 @@ class CreateMedCardCommand(CommandHandler):
             self._db_gateway.commit()
         except (CurrentPatientAlreadyHaveMedCard, PatientNotFound):
             self._db_gateway.rollback()
-
-        return med_card_uuid.get_value()

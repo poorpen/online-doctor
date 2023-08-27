@@ -6,7 +6,7 @@ from src.common.application.interfaces.identity_provider import IIdentityProvide
 from src.common.application.exceptions.access import AccessDenied
 
 from src.application.med_card.models.query import GetDoctorsNotes
-from src.application.med_card.models.dto import DoctorNotes
+from src.application.med_card.models.dto import DoctorNotesDTO
 
 from src.application.med_card.interfaces.med_card_db_gateway import IMedCardDBGateway
 
@@ -21,7 +21,7 @@ class GetDoctorsNotesQuery(QueryHandler):
         self._db_gateway = db_gateway
         self._identity_provider = identity_provider
 
-    def __call__(self, query_data: GetDoctorsNotes) -> List[DoctorNotes]:
+    def __call__(self, query_data: GetDoctorsNotes) -> List[DoctorNotesDTO]:
         patient_uuid = self._db_gateway.med_card_reader.get_patient_uuid_by_med_card_uuid(query_data.med_card_uuid)
 
         can_get_doctors_notes = IsDoctor() | (IsPatient() & UserUUIDMatches(patient_uuid))

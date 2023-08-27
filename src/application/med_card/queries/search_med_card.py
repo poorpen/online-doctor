@@ -6,7 +6,7 @@ from src.common.application.interfaces.identity_provider import IIdentityProvide
 from src.common.application.exceptions.access import AccessDenied
 
 from src.application.med_card.models.query import SearchMedCard
-from src.application.med_card.models.dto import MedCardDTO
+from src.application.med_card.models.dto import MedCardPreviewDTO
 from src.application.med_card.interfaces.med_card_db_gateway import IMedCardDBGateway
 
 
@@ -20,7 +20,7 @@ class SearchMedCardQuery(QueryHandler):
         self._db_gateway = db_gateway
         self._identity_provider = identity_provider
 
-    def __call__(self, query_data: SearchMedCard) -> List[MedCardDTO]:
+    def __call__(self, query_data: SearchMedCard) -> List[MedCardPreviewDTO]:
         can_search_med_card = IsDoctor()
         access_policy = self._identity_provider.get_access_policy()
         if not can_search_med_card.is_satisfied_by(access_policy):

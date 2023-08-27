@@ -27,8 +27,8 @@ class AddDoctorNote(CommandObject):
 @dataclass(frozen=True)
 class EditAnthropometryData(CommandObject):
     med_card_uuid: UUID
-    weight: int | None = None
-    height: int | None = None
+    weight: int = 0
+    height: int = 0
 
 
 @dataclass(frozen=True)
