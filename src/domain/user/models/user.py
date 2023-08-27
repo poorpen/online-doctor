@@ -4,7 +4,7 @@ from uuid import uuid4
 from src.common.domain.models.aggregate import AggregateRoot
 from src.common.domain.value_objects.identifiers import UUIDVO
 
-from src.domain.user.value_objects.user import Phone, Password
+from src.domain.user.value_objects.user import Phone, Password, FirstName, LastName, MiddleName
 from src.domain.user.enum.role import Role
 
 
@@ -12,6 +12,9 @@ from src.domain.user.enum.role import Role
 class User(AggregateRoot):
     uuid: UUIDVO
     password: Password
+    first_name: FirstName
+    last_name: LastName
+    middle_name: MiddleName
     phone: Phone
     role: Role
 

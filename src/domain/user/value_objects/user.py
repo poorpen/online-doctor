@@ -19,3 +19,17 @@ class Phone(BaseValueObject[str]):
             raise ValueError("Missing or invalid default region")
         if not phonenumbers.is_valid_number(parsed_number):
             raise ValueError("Phone humber invalid!")
+
+
+
+
+class FirstName(NonEmptyText):
+    max_len: int = 60
+
+
+class LastName(NonEmptyText):
+    max_len: int = 60
+
+
+class MiddleName(NonEmptyText):
+    max_len: int = 60
