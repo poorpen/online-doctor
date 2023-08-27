@@ -10,7 +10,7 @@ from src.domain.med_card.value_objects.doctor_note import AnamnesisMorbi, Diagno
 @dataclass
 class DoctorNote(Entity):
     uuid: UUIDVO
-    medcard_uuid: MedCardUUID
+    med_card_uuid: MedCardUUID
     doctor_uuid: DoctorUUID
     anamnesis_morbi: AnamnesisMorbi
     diagnosis: Diagnosis

@@ -3,15 +3,15 @@ from src.common.domain.value_objects.string import NonEmptyText
 
 
 class AnamnesisMorbi(NonEmptyText):
-    pass
+    max_len: int = 350
 
 
 class TreatmentPlan(NonEmptyText):
-    pass
+    max_len: int = 350
 
 
 class Diagnosis(NonEmptyText):
-    max_len: int = 100
+    max_len: int = 255
 
 
 class DoctorUUID(UUIDVO):

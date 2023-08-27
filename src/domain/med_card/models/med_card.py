@@ -1,9 +1,11 @@
+import dataclasses
 from uuid import uuid4, UUID
 from typing import List, Optional
 from dataclasses import dataclass, field
 
 from src.common.domain.models.aggregate import AggregateRoot
 from src.common.domain.value_objects.identifiers import UUIDVO
+from src.common.domain.utils.binary_search import binary_search
 
 from src.domain.med_card.models.doctor_note import DoctorNote
 from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint
@@ -28,6 +30,7 @@ class MedCard(AggregateRoot):
     gender: Gender
     height: Height = field(default=Height(0))
     weight: Weight = field(default=Weight(0))
+    deleted: bool = field(default=False)
     anamnesis_vitae: List[AnamnesisVitaePoint] = field(default_factory=list)
     doctor_notes: List[DoctorNote] = field(default_factory=list)
 
@@ -63,6 +66,7 @@ class MedCard(AggregateRoot):
 
     @property
     def get_patient_uuid(self) -> UUID:
+        self._check_delete()
         return self.patient_uuid.get_value()
 
     def add_doctor_note(
@@ -72,11 +76,12 @@ class MedCard(AggregateRoot):
             diagnosis: Diagnosis,
             treatment_plan: TreatmentPlan
     ) -> None:
+        self._check_delete()
         note_uuid = UUIDVO(uuid4())
         self.doctor_notes.append(
             DoctorNote(
                 uuid=note_uuid,
-                medcard_uuid=MedCardUUID(self.uuid.get_value()),
+                med_card_uuid=MedCardUUID(self.uuid.get_value()),
                 doctor_uuid=doctor_uuid,
                 anamnesis_morbi=anamnesis_morbi,
                 diagnosis=diagnosis,
@@ -92,6 +97,7 @@ class MedCard(AggregateRoot):
         )
 
     def update_answers_in_anamnesis_vitae(self, answers_ids: List[AnswerID], category_id: CategoryID) -> None:
+        self._check_delete()
         anamnesis_vitae_point = self._search_anamnesis_vitae_point(category_id)
         if not anamnesis_vitae_point:
             anamnesis_vitae_point = AnamnesisVitaePoint(medcard_uuid=MedCardUUID(self.uuid.get_value()),
@@ -106,29 +112,33 @@ class MedCard(AggregateRoot):
             )
         )
 
-    def edit_anthropometry_data(self, weight: Optional[Weight] = None, height: Optional[Height] = None) -> None:
-        if weight:
+    def edit_anthropometry_data(self, weight: Weight, height: Height) -> None:
+        self._check_delete()
+        if weight.get_value():
             self.weight = weight
-        if height:
+        if height.get_value():
             self.height = height
         self.record_event(
             AnthropometryDataEdited(
                 med_card_uuid=self.uuid.get_value(),
-                weight=weight.get_value(),
-                height=height.get_value()
+                weight=self.weight.get_value(),
+                height=self.height.get_value()
             )
         )
 
-    def _search_anamnesis_vitae_point(self, category_id: CategoryID) -> AnamnesisVitaePoint | None:
+    def delete_med_card(self):
+        self._check_delete()
+        self.deleted = True
+
+    def _check_delete(self) -> None:
+        if self.deleted:
+            raise Exception
+
+    def _search_anamnesis_vitae_point(self, category_id: CategoryID) -> AnamnesisVitaePoint:
         collection_to_search = sorted(self.anamnesis_vitae, key=lambda p: p.anamnesis_category_id)
-        low = 0
-        high = len(collection_to_search) - 1
-        while low <= high:
-            mid = (low + high) // 2
-            mid_item: AnamnesisVitaePoint = collection_to_search[mid]
-            if mid_item.anamnesis_category_id == category_id:
-                return mid_item
-            elif mid_item.anamnesis_category_id < category_id:
-                low = mid + 1
-            elif mid_item.anamnesis_category_id > category_id:
-                high = mid - 1
+        return binary_search(
+            collection_to_search,
+            category_id,
+            lambda vitae_point: vitae_point.anamnesis_category_id
+        )
+

@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 from src.common.domain.models.aggregate import AggregateRoot
 from src.common.domain.value_objects.identifiers import UUIDVO
+from src.common.domain.utils.binary_search import binary_search
 
 from src.domain.doctor_appointment_schedule.models.doctor_appointment import DoctorAppointment
 from src.domain.doctor_appointment_schedule.value_object.doctor_appointment_schedule import DoctorUUID
@@ -41,16 +42,10 @@ class DoctorAppointmentsSchedule(AggregateRoot):
             raise AppointmentNotExist(doctor_appointment_date)
         appointment.mark_busy()
 
-    def _search_appointment(self, doctor_appointment_datetime: DoctorAppointmentDateTime) -> DoctorAppointment:
+    def _search_appointment(self, doctor_appointment_datetime: DoctorAppointmentDateTime) -> DoctorAppointment | None:
         collection_to_search = sorted(self.doctor_appointments, key=lambda p: p.appointment_datetime)
-        low = 0
-        high = len(collection_to_search) - 1
-        while low <= high:
-            mid = (low + high) // 2
-            mid_item: DoctorAppointment = collection_to_search[mid]
-            if mid_item.appointment_datetime == doctor_appointment_datetime:
-                return mid_item
-            elif mid_item.appointment_datetime < doctor_appointment_datetime:
-                low = mid + 1
-            elif mid_item.appointment_datetime > doctor_appointment_datetime:
-                high = mid - 1
+        return binary_search(
+            collection_to_search,
+            doctor_appointment_datetime,
+            lambda appointment: appointment.appointment_datetime
+        )
