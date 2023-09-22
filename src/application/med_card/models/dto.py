@@ -26,19 +26,24 @@ class AnswersForCategory(DTO):
     answers: List[AnswerDTO]
 
 
+# @dataclass(frozen=True)
+# class MedCardPreviewDTO(DTO):
+#     uuid: UUID
+#     first_name: str
+#     last_name: str
+#     middle_name: str
+#     date_of_birth: datetime
+#     gender: str
+
+
 @dataclass(frozen=True)
-class MedCardPreviewDTO(DTO):
+class MedCardDTO(DTO):
     uuid: UUID
-    patient_uuid: UUID
     first_name: str
     last_name: str
     middle_name: str
     date_of_birth: datetime
     gender: str
-
-
-@dataclass(frozen=True)
-class MedCardDTO(MedCardPreviewDTO):
     height: int
     weight: int
     anamnesis_vitae: List[AnamnesisVitaePointDTO]

@@ -8,7 +8,6 @@ from src.common.application.models.comand import CommandObject
 
 @dataclass(frozen=True)
 class CreateMedCard(CommandObject):
-    patient_uuid: UUID
     first_name: str
     last_name: str
     middle_name: str

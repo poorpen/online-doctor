@@ -1,16 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from sqlalchemy.sql.selectable import Select
 
 
 class BaseQueryBuilder(ABC):
 
-    def __init__(self):
-        self._query = None
+    def __init__(self, query: Select):
+        self._query = query
 
-    def _build(self) -> Select:
+    def build(self) -> Select:
         return self._query
-
-    @abstractmethod
-    def get_query(self, *args, **kwargs) -> Select:
-        pass

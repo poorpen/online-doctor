@@ -24,13 +24,3 @@ class DateTimeOfBirth(BaseValueObject[datetime]):
     pass
 
 
-class FirstName(NonEmptyText):
-    max_len: int = 60
-
-
-class LastName(NonEmptyText):
-    max_len: int = 60
-
-
-class MiddleName(NonEmptyText):
-    max_len: int = 60

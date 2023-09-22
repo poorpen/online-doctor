@@ -1,94 +1,72 @@
 from typing import Optional, List
-from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 
 from src.common.infrastructure.database.repositories.base import SQLAlchemyRepo
 
 from src.application.med_card.interfaces.med_card_reader import IMedCardReader
-from src.application.med_card.models.dto import MedCardPreviewDTO, MedCardDTO, AnswersForCategory, DoctorNotesDTO
-from src.application.med_card.exceptions.med_card import MedCardNotFound, AnswersForCurrentCategoryNotFound, DoctorNotesNotFound
+from src.application.med_card.models.dto import MedCardDTO, AnswersForCategory, DoctorNotesDTO
+from src.application.med_card.exceptions.med_card import MedCardNotFound, AnswersForCurrentCategoryNotFound, \
+    DoctorNotesNotFound
 
-from src.infrastructure.database.models.med_card.answer import AnswerForAnamnesisDB
-from src.infrastructure.database.models.med_card.category import AnamnesisCategoryDB
-from src.infrastructure.database.models.med_card.doctor_note import DoctorNoteDB
-from src.infrastructure.database.models.med_card.med_card import MedCardDB
-from src.infrastructure.database.converters.med_card import db_model_to_dto, db_answers_model_to_dto, \
-    db_doctors_notes_to_dto
+from src.infrastructure.database.models.med_card.doctor_note import doctor_note
+from src.infrastructure.database.models.med_card.anamnesis_vitae_point import (
+    answer_for_category, anamnesis_category)
+from src.infrastructure.database.repositories.med_card.query_builder import MedCardQueryBuilder
+from src.infrastructure.database.converters.med_card import (
+    to_med_card_dto, to_answer_for_category_dto, to_doctor_notes_dto)
 
 
 class MedCardReader(SQLAlchemyRepo, IMedCardReader):
 
-    def __init__(self, session: Session, query_builder):
-        super().__init__(session)
-        self.query_builder = query_builder
-
-    def search_med_card(
-            self,
-            fist_name: Optional[str] = None,
-            last_name: Optional[str] = None,
-            middle_name: Optional[str] = None,
-            datetime_of_birth: Optional[datetime] = None,
-            gender: Optional[str] = None
-    ) -> List[MedCardPreviewDTO]:
-        pass
-
-    def get_med_card_by_med_card_or_patient_uuid(
+    def get_med_card_by_patient_or_med_card_uuid(
             self,
             patient_uuid: Optional[UUID] = None,
             med_card_uuid: Optional[UUID] = None
     ) -> MedCardDTO:
-        sql = select(MedCardDB)
 
-        if patient_uuid:
-            sql = sql.where(MedCardDB.patient_uuid == patient_uuid)
-            identity = patient_uuid
-        else:
-            sql = sql.where(MedCardDB.uuid == med_card_uuid)
-            identity = med_card_uuid
+        stmt = (
+            MedCardQueryBuilder()
+            .by_med_card_or_patient_uuid(patient_uuid, med_card_uuid)
+            .with_anamnesis_vitae_point()
+            .with_names_categories()
+            .with_names_answers()
+            .build())
 
-        result = self._session.execute(sql)
+        result = self._session.execute(stmt)
+        mapped_result = result.mappings().all()
 
-        med_card = result.scalar()
+        if not mapped_result:
+            raise MedCardNotFound(patient_uuid if patient_uuid else med_card_uuid)
 
-        if not med_card:
-            raise MedCardNotFound(identity)
-
-        return db_model_to_dto(med_card)
+        return to_med_card_dto(mapped_result)
 
     def get_answers_for_anamnesis_vitae(self, category_id: int) -> AnswersForCategory:
-        sql = select(AnamnesisCategoryDB, AnswerForAnamnesisDB).where(
-            AnswerForAnamnesisDB.category_id == category_id
-        ).join(
-            AnamnesisCategoryDB, AnamnesisCategoryDB.id == AnswerForAnamnesisDB.category_id
-        )
+        sql = (select(anamnesis_category.c.id.label('category_id'),
+                      anamnesis_category.c.name.label('category_name'),
+                      answer_for_category.c.id.label('answer_id'),
+                      answer_for_category.c.name.label('answer_name'))
+               .where(anamnesis_category.c.id == category_id)
+               .join(answer_for_category))
 
         result = self._session.execute(sql)
 
-        answers = result.all()
+        mapped_result = result.mappings().all()
 
-        if not answers:
+        if not mapped_result:
             raise AnswersForCurrentCategoryNotFound(category_id)
 
-        return db_answers_model_to_dto(answers)
+        return to_answer_for_category_dto(mapped_result)
 
     def get_doctors_notes_by_med_card_uuid(self, med_card_uuid: UUID) -> List[DoctorNotesDTO]:
-        sql = select(DoctorNoteDB).where(DoctorNoteDB.med_card_uuid == med_card_uuid)
+        sql = select(doctor_note).where(doctor_note.c.med_card_uuid == med_card_uuid)
 
         result = self._session.execute(sql)
 
-        notes = result.scalars().all()
+        mapped_result = result.mappings().all()
 
-        if not notes:
+        if not mapped_result:
             raise DoctorNotesNotFound(med_card_uuid)
 
-        return db_doctors_notes_to_dto(notes)
-
-    def get_patient_uuid_by_med_card_uuid(self, med_card_uuid: UUID) -> UUID:
-        sql = select(MedCardDB.patient_uuid).where(MedCardDB.uuid == med_card_uuid)
-
-        result = self._session.execute(sql)
-
-        return result.scalar()
+        return to_doctor_notes_dto(mapped_result)

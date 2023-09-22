@@ -1,18 +1,63 @@
-from uuid import UUID
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import ForeignKey, Table, Column, Integer, UUID, String
+from sqlalchemy.orm import composite, relationship
 
-from src.common.infrastructure.database.models.base import Base
+from src.common.domain.value_objects.identifiers import UUIDVO
 
-from src.infrastructure.database.models.med_card.answer import AnswerForAnamnesisDB
-from src.infrastructure.database.models.med_card.category import AnamnesisCategoryDB
+from src.domain.med_card.value_objects.anamnesis_vitae_point import CategoryID, AnswerID, PointUUID
+from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint, AnamnesisPointAnswer
+from src.common.infrastructure.database.models.base import metadata_obj, mapper_registry
+
+anamnesis_category = Table(
+    'anamnesis_categories',
+    metadata_obj,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(60), nullable=False)
+
+)
+
+answer_for_category = Table(
+    'answers_for_anamnesis_categories',
+    metadata_obj,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(60), nullable=False),
+    Column('category_id', Integer, ForeignKey('anamnesis_categories.id'))
+)
+
+anamnesis_vitae_point = Table(
+    'anamnesis_vitae_points',
+    metadata_obj,
+    Column('uuid', UUID, primary_key=True),
+    Column('med_card_uuid', UUID, ForeignKey('med_cards.uuid'), nullable=False),
+    Column('category_id', Integer, ForeignKey('anamnesis_categories.id'), nullable=False)
+)
+
+answer_for_anamnesis_point = Table(
+    'answers_for_anamnesis_point',
+    metadata_obj,
+    Column('point_uuid', UUID, ForeignKey('anamnesis_vitae_points.uuid'), primary_key=True),
+    Column('answer_id', Integer, ForeignKey('answers.id'), primary_key=True)
+)
 
 
-class AnamnesisVitaePointDB(Base):
-    __tablename__ = 'anamnesis_vitae_point'
+def map_anamnesis_point() -> None:
+    mapper_registry(
+        AnamnesisPointAnswer,
+        answer_for_anamnesis_point,
+        properties={
+            'point_id': composite(PointUUID, answer_for_anamnesis_point.c.point_uuid),
+            'answer_id': composite(AnswerID, answer_for_anamnesis_point.c.answer_id)
+        },
+        column_prefix='_'
 
-    med_card_uuid: Mapped[UUID] = mapped_column(ForeignKey('med_cards.uuid'), primary_key=True)
-    category_id: Mapped[int] = mapped_column(ForeignKey('anamnesis_categories.id'), primary_key=True)
-    answer_id: Mapped[int] = mapped_column(ForeignKey('answers_for_anamnesis.id'), primary_key=True)
-    category: Mapped["AnamnesisCategoryDB"] = relationship(lazy=None)
-    answer: Mapped["AnswerForAnamnesisDB"] = relationship(lazy=None)
+    )
+    mapper_registry(
+        AnamnesisVitaePoint,
+        anamnesis_vitae_point,
+        properties={
+            'uuid': composite(UUIDVO, anamnesis_vitae_point.c.uuid),
+            'med_card_uuid': composite(UUIDVO, anamnesis_vitae_point.c.med_card_uuid),
+            'category_id': composite(CategoryID, anamnesis_vitae_point.c.med_card_uuid),
+            'answers_ids': relationship(AnamnesisPointAnswer)
+        },
+        column_prefix='_'
+    )

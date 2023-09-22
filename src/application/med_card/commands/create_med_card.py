@@ -29,7 +29,7 @@ class CreateMedCardCommand(CommandHandler):
             raise AccessDenied(access_policy.user_uuid)
 
         med_card_uuid = UUIDVO(uuid4())
-        patient_uuid = PatientUUID(command_data.patient_uuid)
+        patient_uuid = PatientUUID(access_policy.user_uuid)
         first_name = FirstName(command_data.first_name)
         last_name = LastName(command_data.last_name)
         middle_name = MiddleName(command_data.middle_name)

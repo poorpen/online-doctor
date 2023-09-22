@@ -9,7 +9,6 @@ from src.common.application.models.query import Query
 @dataclass(frozen=True)
 class GetMedCard(Query):
     med_card_uuid: UUID
-    patient_uuid: UUID
 
 
 @dataclass(frozen=True)

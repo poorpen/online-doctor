@@ -15,15 +15,18 @@ class IMedCardReader(Protocol):
                         gender: Optional[str] = None) -> List[MedCardPreviewDTO]:
         raise NotImplemented
 
-    def get_med_card_by_med_card_or_patient_uuid(self, patient_uuid: Optional[UUID] = None,
-                                                 med_card_uuid: Optional[UUID] = None) -> MedCardDTO:
+    def get_med_card_by_patient_or_med_card_uuid(
+            self,
+            patient_uuid: Optional[UUID] = None,
+            med_card_uuid: Optional[UUID] = None
+    ) -> MedCardDTO:
         raise NotImplemented
 
     def get_answers_for_anamnesis_vitae(self, category_id: int) -> AnswersForCategory:
         raise NotImplemented
 
-    def get_patient_uuid_by_med_card_uuid(self, med_card_uuid: UUID) -> UUID:
+    def get_doctors_notes_by_med_card_uuid(self, med_card_uuid: UUID) -> List[DoctorNotesDTO]:
         raise NotImplemented
 
-    def get_doctors_notes_by_med_card_uuid(self, med_card_uuid: UUID) -> List[DoctorNotesDTO]:
+    def get_med_card_uuid_by_patient_uuid(self, patient_uuid: UUID) -> UUID:
         raise NotImplemented

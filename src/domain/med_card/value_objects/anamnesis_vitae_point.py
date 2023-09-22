@@ -1,4 +1,4 @@
-from src.common.domain.value_objects.identifiers import ID
+from src.common.domain.value_objects.identifiers import ID, UUIDVO
 
 
 class CategoryID(ID):
@@ -6,4 +6,8 @@ class CategoryID(ID):
 
 
 class AnswerID(ID):
+    pass
+
+
+class PointUUID(UUIDVO):
     pass

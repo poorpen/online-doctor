@@ -1,152 +1,73 @@
-from sqlalchemy.engine.row import Row
+from typing import Sequence, List
 
-from typing import List, Tuple, Sequence
+from sqlalchemy import RowMapping
 
-from src.domain.med_card.models.anamesis_vitae_point import AnamnesisVitaePoint
-from src.domain.med_card.models.med_card import MedCard
-
-from src.application.med_card.models.dto import MedCardDTO, MedCardPreviewDTO, AnamnesisVitaePointDTO, DoctorNotesDTO, \
+from src.application.med_card.models.dto import MedCardDTO, AnamnesisVitaePointDTO, DoctorNotesDTO, \
     AnswersForCategory, AnswerDTO, DoctorNoteDTO
 
-from src.infrastructure.database.models.med_card.category import AnamnesisCategoryDB
-from src.infrastructure.database.models.med_card.answer import AnswerForAnamnesisDB
-from src.infrastructure.database.models.med_card.anamnesis_vitae_point import AnamnesisVitaePointDB
-from src.infrastructure.database.models.med_card.doctor_note import DoctorNoteDB
-from src.infrastructure.database.models.med_card.med_card import MedCardDB
 
-
-def aggregate_to_db_model(data: MedCard) -> MedCardDB:
-    anamnesis_vitae = [
-        AnamnesisVitaePointDB(
-            med_card_uuid=point.medcard_uuid,
-            category_id=point.category_id,
-            answer_id=answer
-        )
-        for point in data.anamnesis_vitae for answer in point.answers_ids
-    ]
-    doctor_notes = [
-        DoctorNoteDB(
-            uuid=note.uuid,
-            med_card_uuid=note.med_card_uuid,
-            doctor_uuid=note.doctor_uuid,
-            anamnesis_morbi=note.anamnesis_morbi,
-            diagnosis=note.diagnosis,
-            treatment_plan=note.treatment_plan
-        )
-        for note in data.doctor_notes
-    ]
-    return MedCardDB(
-        uuid=data.uuid,
-        patient_uuid=data.patient_uuid,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        middle_name=data.middle_name,
-        datetime_of_birth=data.datetime_of_birth,
-        gender=data.gender,
-        height=data.height,
-        weight=data.weight,
-        deleted=data.deleted,
-        anamnesis_vitae=anamnesis_vitae,
-        doctor_notes=doctor_notes
-    )
-
-
-def db_model_to_aggregate(data: MedCardDB) -> MedCard:
-    anamnesis_vitae = {}
-    for db_point in data.anamnesis_vitae:
-
-        if db_point.category_id not in anamnesis_vitae:
-            anamnesis_vitae[db_point.category_id] = AnamnesisVitaePoint(
-                medcard_uuid=db_point.med_card_uuid,
-                category_id=db_point.category_id,
-                answers_ids=[]
-            )
-
-        domain_point = anamnesis_vitae[db_point.category_id]
-        domain_point.answers_ids.append(db_point.answer_id)
-
-    return MedCard(
-        uuid=data.uuid,
-        patient_uuid=data.patient_uuid,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        middle_name=data.middle_name,
-        datetime_of_birth=data.datetime_of_birth,
-        gender=data.gender,
-        height=data.height,
-        weight=data.weight,
-        deleted=data.deleted,
-        anamnesis_vitae=list(anamnesis_vitae.values()),
-        doctor_notes=data.doctor_notes
-    )
-
-
-def db_model_to_dto_preview(data: MedCardDB) -> MedCardPreviewDTO:
-    return MedCardPreviewDTO(
-        uuid=data.uuid,
-        patient_uuid=data.patient_uuid,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        middle_name=data.middle_name,
-        date_of_birth=data.datetime_of_birth,
-        gender=data.gender
-    )
-
-
-def db_models_to_dto_previews(data: List[MedCardDB]) -> List[MedCardPreviewDTO]:
-    return [db_model_to_dto_preview(model) for model in data]
-
-
-def db_model_to_dto(data: MedCardDB) -> MedCardDTO:
-    anamnesis_vitae = {}
-    for db_point in data.anamnesis_vitae:
-
-        if db_point.category_id not in anamnesis_vitae:
-            anamnesis_vitae[db_point.category_id] = AnamnesisVitaePointDTO(
-                category_id=db_point.category_id,
-                category_name=db_point.category.name,
+def to_med_card_dto(data: Sequence[RowMapping]) -> MedCardDTO:
+    anamnesis_points = {}
+    for row in data:
+        if row['anamnesis_uuid'] not in anamnesis_points:
+            anamnesis_points[row['anamnesis_uuid']] = AnamnesisVitaePointDTO(
+                category_id=row['category_id'],
+                category_name=row['category_name'],
                 answers_names=[]
             )
 
-        domain_point = anamnesis_vitae[db_point.category_id]
-        domain_point.answers_names.append(db_point.answer.name)
-
+        point = anamnesis_points['anamnesis_uuid']
+        point.answers_names.append(row['answer_name'])
+    first_row = data[0]
     return MedCardDTO(
-        uuid=data.uuid,
-        first_name=data.first_name,
-        last_name=data.last_name,
-        middle_name=data.middle_name,
-        date_of_birth=data.datetime_of_birth,
-        gender=data.gender,
-        patient_uuid=data.patient_uuid,
-        height=data.height,
-        weight=data.weight,
-        anamnesis_vitae=list(anamnesis_vitae.values())
+        uuid=first_row['med_card_uuid'],
+        first_name=first_row['first_name'],
+        last_name=first_row['last_name'],
+        middle_name=first_row['middle_name'],
+        date_of_birth=first_row['date_of_birth'],
+        gender=first_row['gender'],
+        height=first_row['height'],
+        weight=first_row['weight'],
+        anamnesis_vitae=list(anamnesis_points.values())
+
     )
 
 
-def db_answers_model_to_dto(data: Sequence[Row[Tuple[AnamnesisCategoryDB, AnswerForAnamnesisDB]]]) -> AnswersForCategory:
+def to_answer_for_category_dto(data: Sequence[RowMapping]) -> AnswersForCategory:
+    answers = []
+    for row in data:
+        answers.append(
+            AnswerDTO(
+                answer_id=row['answer_id'],
+                answer_name=row['answer_name']
+            )
+        )
+    first_row = data[0]
     return AnswersForCategory(
-        category_name=data[0][0].name,
-        category_id=data[0][0].id,
-        answers=[AnswerDTO(answer_id=answer.id, answer_name=answer.name) for _, answer in data]
+        category_id=first_row['category_id'],
+        category_name=first_row['category_name'],
+        answers=answers
     )
 
 
-def db_doctors_notes_to_dto(data: Sequence[DoctorNoteDB]) -> List[DoctorNotesDTO]:
-    dto_notes = {}
-    for note in data:
-        if note.doctor_uuid not in dto_notes:
-            dto_notes[note.doctor_uuid] = DoctorNotesDTO(
-                doctor_uuid=note.doctor_uuid,
-                doctor_first_name=note.doctor.first_name,
-                doctor_last_name=note.doctor.last_name,
-                doctor_middle_name=note.doctor.middle_name,
+def to_doctor_notes_dto(data: Sequence[RowMapping]) -> List[DoctorNotesDTO]:
+    doctors = {}
+    for row in data:
+        if row['doctor_uuid'] not in doctors:
+            doctors[row['doctor_uuid']] = DoctorNotesDTO(
+                doctor_uuid=row['doctor_uuid'],
+                doctor_first_name=row['doctor_first_name'],
+                doctor_last_name=row['doctor_last_name'],
+                doctor_middle_name=row['doctor_middle_name'],
                 notes=[]
             )
-
-        dto_note = dto_notes[note.doctor_uuid]
-        dto_note.notes.append(DoctorNoteDTO(anamnesis_morbi=note.anamnesis_morbi, diagnosis=note.diagnosis,
-                                            treatment_plan=note.treatment_plan, note_uuid=note.uuid))
-
-    return list(dto_notes.values())
+        doctor = doctors[row['doctor_uuid']]
+        doctor.notes.append(
+            DoctorNoteDTO(
+                note_uuid=row['uuid'],
+                anamnesis_morbi=row['anamnesis_morbi'],
+                diagnosis=row['diagnosis'],
+                treatment_plan=row['treatment_plan']
+            )
+        )
+    return list(doctors.values())
